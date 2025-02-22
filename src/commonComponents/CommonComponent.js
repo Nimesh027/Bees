@@ -6,6 +6,7 @@ import { useNetworkStatus } from '../service/hooks/useNetworkStatus';
 import { useDataContext } from '../service/DataContext';
 import { theme } from '../theme/theme';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { useTranslation } from 'react-i18next';
 
 export const CustomText = ({ title, style, ...props }) => {
     const Styles = useMemo(() => createStyles(theme), [theme]);
@@ -64,7 +65,7 @@ export const CardButton = ({ title, iconName, style, isMainWrapper }) => {
 };
 
 export const CustomButton = ({ title, routeName, ...props }) => {
-
+    const { t } = useTranslation();
     const isConnected = useNetworkStatus();
     const navigation = useNavigation();
     const Styles = useMemo(() => createStyles(theme), [theme]);
@@ -75,7 +76,7 @@ export const CustomButton = ({ title, routeName, ...props }) => {
             onPress={() => {
                 if (routeName && isConnected) {
                     navigation.replace(routeName);
-                    ToastAndroid.show("T&C successfully accepted", ToastAndroid.SHORT);
+                    ToastAndroid.show(t('t_and_c'), ToastAndroid.SHORT);
                 } else {
                     navigation.replace('DefaultScreen');
                 }
@@ -88,6 +89,7 @@ export const CustomButton = ({ title, routeName, ...props }) => {
 };
 
 export const DailyBonus = ({ data }) => {
+    const { t } = useTranslation();
     const { isConnected, loadData } = useDataContext();
     const navigation = useNavigation();
     const Styles = createStyles(theme);
@@ -101,17 +103,18 @@ export const DailyBonus = ({ data }) => {
             loadData(data);
             navigation.navigate('Collect Spin');
         } else {
-            Alert.alert("No data available to load.");
+            Alert.alert(t('no_data_avilable_to_load'));
         }
     };
 
     return (
         <View style={Styles.cardContainer}>
             <TouchableOpacity style={Styles.contentContainer} onPress={handleCard}>
-                <Icon name="money" size={50} color={theme.colors.primary} style={Styles.coinIcon} />
+                <Image source={require("../../assets/Images/SpinLogoPNG.png")} style={Styles.coinIcon} resizeMode="contain" />
+                {/* <Icon name="money" size={50} color={theme.colors.primary} style={Styles.coinIcon} /> */}
                 <View style={Styles.textContainer}>
-                    <Text style={Styles.title}>{data?.rewards_title || "No title available"}</Text>
-                    <Text style={Styles.date}>{data?.rewards_date || "No date available"}</Text>
+                    <Text style={Styles.title}>{data?.rewards_title?.replace(/Spin Bonus/g, t('spin_bonus')) || t('no_title_available')}</Text>
+                    <Text style={Styles.date}>{data?.rewards_date || t('no_date_available')}</Text>
                 </View>
                 <View style={Styles.arrowButton}>
                     <Icon name="angle-right" size={30} color={theme.colors.secondary} />
@@ -277,6 +280,8 @@ const createStyles = ({ text: { subheading, body }, colors: { primary, secondary
         },
         coinIcon: {
             marginRight: width * 0.02,
+            width:50,
+            height:50
         },
         textContainer: {
             flex: 1,

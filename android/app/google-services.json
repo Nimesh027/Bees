@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "599522725307",
-    "project_id": "dd-rewards-c8080",
-    "storage_bucket": "dd-rewards-c8080.firebasestorage.app"
+    "project_number": "639422755046",
+    "project_id": "cm-master-e70e8",
+    "storage_bucket": "cm-master-e70e8.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:599522725307:android:deab2fa5220f8c0034089e",
+        "mobilesdk_app_id": "1:639422755046:android:92b9c3e5bd2d2c5d3acb27",
         "android_client_info": {
           "package_name": "com.reward"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyApT_gW-OQCbRvHniRBxWKN74m6SmQXqGQ"
+          "current_key": "AIzaSyDX9oC1sNKf-cmJ2_UC143MqPNN45dguAg"
         }
       ],
       "services": {

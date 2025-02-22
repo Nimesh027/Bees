@@ -1,19 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StatusBar, View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { StatusBar, View, ActivityIndicator, StyleSheet, Platform, Image } from 'react-native';
 import { CustomText } from '../commonComponents/CommonComponent';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../theme/theme';
 import { useDataContext } from '../service/DataContext';
+import { useTranslation } from 'react-i18next';
 
 export const SplashScreen = () => {
+  const { t } = useTranslation();
   const navigation = useNavigation();
-  const { spinData, loading, error, termsAccepted } = useDataContext();
+  const { language, spinData, loading, error, termsAccepted } = useDataContext();
   const timeoutRef = useRef(null);
   const [hasNavigated, setHasNavigated] = useState(false);
 
   useEffect(() => {
-
     const handleNavigation = () => {
       if (!hasNavigated) {
         if (error) {
@@ -30,7 +30,7 @@ export const SplashScreen = () => {
           if (termsAccepted === 'Accepted') {
             navigation.replace('Spin Master');
           } else {
-            navigation.replace('DetailsScreen');
+            navigation.replace('Language');
           }
           setHasNavigated(true);
         }
@@ -48,11 +48,12 @@ export const SplashScreen = () => {
 
   return (
     <View style={styles.background}>
-      {/* This View is for the entire screen with a white background */}
-      <FontAwesome name="skype" size={80} color="#1BA1F2" />
+      {/* Replacing FontAwesome with an Image */}
+      <Image source={require("../../assets/Images/MainLogoPNG.png")} style={styles.logo} resizeMode="contain" />
+      
       <View style={styles.bottomView}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <CustomText title="Loading..." style={styles.loadingText} />
+        <CustomText title={`${t('loading')}...`} style={styles.loadingText} />
         {error && error !== 'Network Error' && (
           <CustomText title={`Error: ${error}`} style={styles.loadingText} />
         )}
@@ -66,8 +67,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF', // Set background color to white
-    paddingTop: Platform.OS === 'ios' ? 0 : StatusBar.currentHeight, // Add padding for status bar on Android
+    backgroundColor: '#FFFFFF', 
+    paddingTop: Platform.OS === 'ios' ? 0 : StatusBar.currentHeight, 
+  },
+  logo: {
+    width: 120,  // Same size as the previous icon
+    height: 120,
   },
   bottomView: {
     position: 'absolute',
@@ -77,8 +82,9 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 18,
-    color: '#000000', // Set text color to black for better visibility on white background
+    color: '#000000', 
     marginTop: 10,
     textAlign: 'center',
   },
 });
+

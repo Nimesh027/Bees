@@ -4,27 +4,29 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDataContext } from '../service/DataContext';
 import { theme } from '../theme/theme';
+import { useTranslation } from 'react-i18next';
 
 export const HomeScreen = () => {
+  const { t } = useTranslation();
   const { isConnected } = useDataContext();
   const navigation = useNavigation();
   const Styles = useMemo(() => createStyles(theme), [theme]);
   const [loadingCard, setLoadingCard] = useState(null);
   const [backPressCount, setBackPressCount] = useState(0);
 
-  const gameList = [
-    { title: 'Spins', icon: 'gift', name: 'Daily Free Spin', color: "#FF6347" },
-    { title: 'CM Guide', icon: 'book', name: 'CM Guide', color: "#6495ED" },
-    { title: 'Tips', icon: 'lightbulb-o', name: 'Tips & Tricks', color: "#008080" },
-    { title: 'Privacy Policy', icon: 'info-circle', name: 'Privacy Policy', color: "#8A2BE2" },
-  ];
+  const gameList = useMemo(() => [
+    { title: 'Spins', icon: 'gift', name: t('daily_free_spin'), color: "#FF6347" },
+    { title: 'CM Guide', icon: 'book', name: t('cm_guide'), color: "#6495ED" },
+    { title: 'Tips', icon: 'lightbulb-o', name: t('tips_and_tricks'), color: "#008080" },
+    { title: 'Privacy Policy', icon: 'info-circle', name: t('privacy_and_policy'), color: "#8A2BE2" },
+  ], [t]);
 
   useFocusEffect(
     React.useCallback(() => {
       const backAction = () => {
         if (backPressCount === 0) {
           setBackPressCount(1);
-          ToastAndroid.show('Tap again to Exit', ToastAndroid.SHORT);
+          ToastAndroid.show(t('tap_again_to_exit'), ToastAndroid.SHORT);
 
           setTimeout(() => setBackPressCount(0), 2000);
           return true;
@@ -40,7 +42,7 @@ export const HomeScreen = () => {
   );
 
   const openLink = (url) => {
-    Linking.openURL(url).catch(() => Alert.alert('Error', 'Failed to open the link'));
+    Linking.openURL(url).catch(() => Alert.alert(t('error'), t('failed_to_open_link')));
   };
 
   const handlePress = (screenName, index) => {

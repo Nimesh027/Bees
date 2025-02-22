@@ -6,8 +6,10 @@ import { theme } from '../../theme/theme';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Ensure this package is installed
 import Clipboard from '@react-native-clipboard/clipboard'; // Import Clipboard
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 export const CollectLink = () => {
+    const { t } = useTranslation();
     const { isConnected } = useDataContext();
     const navigation = useNavigation();
     const Styles = useMemo(() => createStyles(theme), [theme]);
@@ -21,10 +23,10 @@ export const CollectLink = () => {
 
         try {
             await Share.share({
-                message: `Check out this link: ${data}`,
+                message: `${t('check_out_this_link')} ${data}`,
             });
         } catch (error) {
-            Alert.alert('Error', error.message);
+            Alert.alert(t('error'), error.message);
         }
     };
 
@@ -37,17 +39,17 @@ export const CollectLink = () => {
 
         if (url) {
             Linking.openURL(url).catch(() => {
-                Alert.alert('Error', 'Failed to open the link');
+                Alert.alert(t('error'), t('fail_to_open_link'));
             });
         } else {
-            Alert.alert('Error', 'No URL provided');
+            Alert.alert(t('error'), t('no_url_provide'));
         }
     };
 
     // Function to copy the coupon code to clipboard and show a toast
     const copyToClipboard = (text) => {
         Clipboard.setString(text); // Copy text to clipboard
-        ToastAndroid.show('Text copied!', ToastAndroid.SHORT); // Show toast notification
+        ToastAndroid.show(t('text_copy'), ToastAndroid.SHORT); // Show toast notification
     };
 
     return (
@@ -56,21 +58,21 @@ export const CollectLink = () => {
                 <View style={Styles.cardContainer}>
                     <Icon name="money" size={50} color={theme.colors.secondary} style={Styles.coinIcon} />
                     <View style={Styles.contentContainer}>
-                        <CustomText title={'Collect Your Rewards'} style={Styles.headerText} />
+                        <CustomText title={t('collect_your_reward')} style={Styles.headerText} />
                     </View>
                     <View style={Styles.stepsBox}>
                         <CustomText title={collectedData?.rewards_text} style={Styles.problemTitle} />
                     </View>
                     <View style={Styles.stepsBox}>
                         <View style={Styles.rowContainer}>
-                            <CustomText title={collectedData?.rewards_title} style={Styles.rewardTitle} />
+                            <CustomText title={collectedData?.rewards_title?.replace(/Spin Bonus/g, t('spin_bonus'))} style={Styles.rewardTitle} />
                             <View style={Styles.separator} />
                             <CustomText title={collectedData?.rewards_date} style={Styles.rewardDate} />
                         </View>
                     </View>
                     <View style={Styles.stepsBox}>
                         <View style={Styles.couponContainer}>
-                            <CustomText title={`Code: ${collectedData?.rewards_coupen_code}`} style={Styles.rewardDate} />
+                            <CustomText title={`${t('code')} ${collectedData?.rewards_coupen_code}`} style={Styles.rewardDate} />
                             <TouchableOpacity onPress={() => copyToClipboard(collectedData?.rewards_coupen_code)}>
                                 <Icon name="clipboard" size={20} color={theme.colors.secondary} style={Styles.copyIcon} />
                             </TouchableOpacity>
@@ -81,10 +83,10 @@ export const CollectLink = () => {
 
             <View style={Styles.iconContainer}>
                 <TouchableOpacity style={Styles.Sharebutton} onPress={() => onShare(collectedData?.rewards_link)}>
-                    <CustomText title="Share" style={Styles.SharebuttonText} />
+                    <CustomText title={t('share')} style={Styles.SharebuttonText} />
                 </TouchableOpacity>
                 <TouchableOpacity style={Styles.Collectbutton} onPress={() => openLink(collectedData?.rewards_link)}>
-                    <CustomText title="Collect" style={Styles.CollectbuttonText} />
+                    <CustomText title={t('collect')} style={Styles.CollectbuttonText} />
                 </TouchableOpacity>
             </View>
         </View>

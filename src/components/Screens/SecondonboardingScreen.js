@@ -2,25 +2,27 @@ import React, { useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { CustomText } from '../../commonComponents/CommonComponent';
 import { theme } from '../../theme/theme';
+import { useTranslation } from 'react-i18next';
 
 export const SecondOnboardingScreen = () => {
+  const { t } = useTranslation();
   const Styles = useMemo(() => createStyles(theme), [theme]);
 
   const cardsData = [
     {
       id: 1,
-      title: 'Point-1',
-      description: 'We provide users with links to receive CoinMaster game rewards.',
+      title: t('point_1'),
+      description: t('point_we_provide_user_to_link'),
     },
     {
       id: 2,
-      title: 'Point-2',
-      description: 'These links are provided by the game publisher Coin Master - Moon Active to give players spins and coins in the game!',
+      title: t('point_2'),
+      description: t('provided_by_game_publisher'),
     },
     {
       id: 3,
-      title: 'Point-3',
-      description: 'We aggregate those links to save players from wasting time searching and getting confused with repeated links!',
+      title: t('point_3'),
+      description: t('we_aggregate_those'),
     },
   ];
 

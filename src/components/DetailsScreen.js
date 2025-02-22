@@ -4,10 +4,12 @@ import { useFocusEffect } from '@react-navigation/native';
 import CheckBox from '@react-native-community/checkbox';
 import { theme } from '../theme/theme';
 import { CustomButton } from '../commonComponents/CommonComponent';
+import { useTranslation } from 'react-i18next';
 
 const { width, height } = Dimensions.get('window');
 
 export const DetailsScreen = () => {
+  const { t } = useTranslation();
   const Styles = useMemo(() => createStyles(theme), [theme]);
   const [backPressCount, setBackPressCount] = useState(0);
   const [isChecked, setIsChecked] = useState(false);
@@ -17,7 +19,7 @@ export const DetailsScreen = () => {
       const backAction = () => {
         if (backPressCount === 0) {
           setBackPressCount(1);
-          ToastAndroid.show('Tap again to Exit', ToastAndroid.SHORT);
+          ToastAndroid.show(t('tap_again_to_exit'), ToastAndroid.SHORT);
 
           setTimeout(() => {
             setBackPressCount(0);
@@ -39,10 +41,10 @@ export const DetailsScreen = () => {
   const openLink = (url) => {
     if (url) {
       Linking.openURL(url).catch(() => {
-        Alert.alert('Error', 'Failed to open the link');
+        Alert.alert(t('error'), t('failed_to_open_link'));
       });
     } else {
-      Alert.alert('Error', 'No URL provided');
+      Alert.alert(t('error'), t('no_url_rovide'));
     }
   };
 
@@ -58,7 +60,7 @@ export const DetailsScreen = () => {
             </View>
           </View>
         </View>
-        <Text style={Styles.welcomeText}>WELCOME TO PARADISE</Text>
+        <Text style={Styles.welcomeText}>{t('welcom_to_paradise')}</Text>
         <View style={Styles.lineContainer}>
           <View style={Styles.lineone} />
           <View style={Styles.linetwo} />
@@ -74,15 +76,15 @@ export const DetailsScreen = () => {
             tintColors={{ true: '#8A2BE2', false: '#8A2BE2' }}
             style={Styles.checkbox}
           />
-          <Text style={Styles.checkboxText}>I agree to the </Text>
+          <Text style={Styles.checkboxText}>{t('i_agrre_to_the')} </Text>
           <TouchableOpacity onPress={() => openLink('https://coinmasterfreespin.tech/privacy-policy.php')}>
-            <Text style={Styles.privacyLink}>Privacy Policy</Text>
+            <Text style={Styles.privacyLink}>{t('privacy_policy')}</Text>
           </TouchableOpacity>
         </View>
 
         <View>
           <CustomButton
-            title="Next"
+            title={t('next')}
             routeName="WelcomeScreen"
             disabled={!isChecked} 
             style={[Styles.button, !isChecked && Styles.disabledButton]} 

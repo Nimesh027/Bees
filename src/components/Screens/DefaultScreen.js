@@ -5,28 +5,29 @@ import { CustomButton, CustomText } from '../../commonComponents/CommonComponent
 import { useNavigation } from '@react-navigation/native';
 import { useDataContext } from '../../service/DataContext';
 import { theme } from '../../theme/theme';
+import { useTranslation } from 'react-i18next';
 
 export const DefaultScreen = ({ route }) => {
+    const { t } = useTranslation();
     const Styles = useMemo(() => createStyles(theme), [theme]);
     const navigation = useNavigation();
     const { fetchData, playDetails, blogDetails, isConnected, termsAccepted } = useDataContext();
     const [loading, setLoading] = useState(false);
     const { screen } = route?.params || {};
-    console.log("check network status is ::: ", isConnected)
     const prevIsConnected = useRef(isConnected);
 
     useEffect(() => {
         if (prevIsConnected.current !== isConnected) {
             prevIsConnected.current = isConnected; // Update ref to track state change
             if (isConnected) {
-                ToastAndroid.show('Online', ToastAndroid.SHORT);
+                ToastAndroid.show(t('online'), ToastAndroid.SHORT);
             }
         }
     }, [isConnected]);
 
     const handleRetry = async () => {
         if (!isConnected) {
-            ToastAndroid.show('Check internet connection', ToastAndroid.SHORT);
+            ToastAndroid.show(t('check_internet_connection'), ToastAndroid.SHORT);
             return;
         }
 
@@ -58,7 +59,7 @@ export const DefaultScreen = ({ route }) => {
                 navigation.replace('DetailsScreen');
             }
         } catch (err) {
-            console.error('Error during fetch:', err);
+            console.error(t('error_during_fetch'), err);
             setLoading(false);
         }
     };
@@ -69,12 +70,12 @@ export const DefaultScreen = ({ route }) => {
             ) : (
                 <>
                     <Icon name='wifi' size={theme.dimensions.width * 0.4} color={theme.colors.background} />
-                    <CustomText title='You Are Offline!!!' style={Styles.title} />
-                    <CustomText title='Check Internet' style={Styles.message} />
+                    <CustomText title={t('offline')} style={Styles.title} />
+                    <CustomText title={t('check_internet')} style={Styles.message} />
 
                     <View style={{ padding: theme.dimensions.width * 0.07 }}>
                         <CustomButton
-                            title="Retry"
+                            title={t('retry')}
                             onPress={handleRetry}
                         />
                     </View>

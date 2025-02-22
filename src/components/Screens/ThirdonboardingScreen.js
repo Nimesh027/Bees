@@ -2,19 +2,21 @@ import React, { useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import { CustomText } from '../../commonComponents/CommonComponent';
 import { theme } from '../../theme/theme';
+import { useTranslation } from 'react-i18next';
 
 export const ThirdonboardingScreen = () => {
+    const { t } = useTranslation();
     const Styles = useMemo(() => createStyles(theme), [theme]);
 
     const card_data = [
         {
             id: 1,
-            title: 'Coin Master game installed.',
+            title: t('game_installed'),
             path: require('../../../assets/Images/second.png')
         },
         {
             id: 2,
-            title: 'Complete the games tutorial, It’s best to complete the first village.',
+            title: t('complate_the_first_village'),
             path: require('../../../assets/Images/third.jpg')
         },
     ];
@@ -24,7 +26,7 @@ export const ThirdonboardingScreen = () => {
             {card_data.map((card, index) => (
                 <View key={card.id} style={Styles.cardSection}>
                     <View style={Styles.stepWrapper}>
-                        <CustomText title={`Step - ${index + 1}`} style={Styles.stepTitle} />
+                        <CustomText title={`${t('step')} - ${index + 1}`} style={Styles.stepTitle} />
                     </View>
                     <CustomText title={card.title} style={Styles.cardTitleText} />
                     <View style={Styles.cardWrapper}>
@@ -32,7 +34,7 @@ export const ThirdonboardingScreen = () => {
                     </View>
                 </View>
             ))}
-            <CustomText title='To receive the reward from the link, you must satisfy the above two requirements:' style={Styles.bottomText} />
+            <CustomText title={t('to_receved_rewards_links')} style={Styles.bottomText} />
         </ScrollView>
     );
 };

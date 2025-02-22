@@ -7,8 +7,10 @@ import { useNavigation } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../../theme/theme';
+import { useTranslation } from 'react-i18next';
 
 export const Menu = () => {
+    const { t } = useTranslation();
     const [modalVisible, setModalVisible] = useState(false);
     const [rating, setRating] = useState(0);
     const [feedback, setFeedback] = useState('');
@@ -58,26 +60,32 @@ export const Menu = () => {
 
     const menuItems = [
         {
+            id: 'language',
+            title: t('select_language'),
+            icon: 'language',
+            action: () => navigation.navigate('Language'),
+        },
+        {
             id: 'rate',
-            title: 'Give 5 Stars',
+            title: t('give_five_star'),
             icon: 'star',
             action: () => setModalVisible(true),
         },
         {
             id: 'share',
-            title: 'Share App',
+            title: t('share_app'),
             icon: 'share-alt',
             action: () => onShare('https://rewards.coinmaster.com/rewards/rewards.html?c=pe_EMAILqPGdhZ_20241027')
         },
         {
             id: 'more_apps',
-            title: 'More Apps',
+            title: t('more_apps'),
             icon: 'th-large',
             action: () => console.log('More Apps')
         },
         {
             id: 'privacy_policy',
-            title: 'Privacy Policy',
+            title: t('privacy_and_policy'),
             icon: 'file-text-o',
             action: () => openLink('https://coinmasterfreespin.tech/privacy-policy.php')
         },
@@ -121,7 +129,7 @@ export const Menu = () => {
                     <View style={Styles.modalContent}>
                         {/* Header Section with RATE US and Close Icon */}
                         <View style={Styles.header}>
-                            <Text style={Styles.modalTitle}>RATE US</Text>
+                            <Text style={Styles.modalTitle}>{t('rate_us')}</Text>
                             <TouchableOpacity style={Styles.closeIcon} onPress={() => setModalVisible(false)}>
                                 <FontAwesome
                                     name="times"
@@ -149,7 +157,7 @@ export const Menu = () => {
 
                         <TextInput
                             style={Styles.textArea}
-                            placeholder="Write your feedback here..."
+                            placeholder={t('feed_bake')}
                             placeholderTextColor={theme.colors.secondary}
                             value={feedback}
                             onChangeText={setFeedback}
@@ -157,7 +165,7 @@ export const Menu = () => {
                         />
 
                         <TouchableOpacity style={Styles.submitButton} onPress={submitRating}>
-                            <Text style={Styles.submitButtonText}>Submit</Text>
+                            <Text style={Styles.submitButtonText}>{t('submit')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

@@ -3,8 +3,10 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { CustomText } from '../../commonComponents/CommonComponent';
 import { theme } from '../../theme/theme';
+import { useTranslation } from 'react-i18next';
 
 export const OnboardingScreen = () => {
+  const { t } = useTranslation();
   const Styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
@@ -12,9 +14,9 @@ export const OnboardingScreen = () => {
       <View style={Styles.container}>
         <Icon name="rocket" size={70} color={theme.colors.primary} style={Styles.icon} />
         <View style={Styles.textContainer}>
-          <CustomText title='Welcome to Our App!' style={Styles.titleText} />
+          <CustomText title={t('welcome_to_our_app')} style={Styles.titleText} />
           <CustomText
-            title="Discover exciting rewards, exclusive bonuses, and a seamless gaming experience. Let's get started!"
+            title={t('discover_existinf_rewards')}
             style={Styles.subText}
           />
         </View>

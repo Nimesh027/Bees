@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { CustomText, CustomTips } from '../../commonComponents/CommonComponent'
-import { PrivacyPolicy } from '../PrivacyPolicy';
 import { useDataContext } from '../../service/DataContext';
 import { theme } from '../../theme/theme';
 

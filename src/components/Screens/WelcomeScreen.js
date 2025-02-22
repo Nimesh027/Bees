@@ -8,8 +8,10 @@ import { OnboardingScreen } from './OnboardingScreen';
 import { CustomText } from '../../commonComponents/CommonComponent';
 import { useDataContext } from '../../service/DataContext';
 import { theme } from '../../theme/theme';
+import { useTranslation } from 'react-i18next';
 
 export const WelcomeScreen = () => {
+    const { t } = useTranslation();
     const { setTermsAcceptedStatus } = useDataContext();
     const [currentScreen, setCurrentScreen] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +29,7 @@ export const WelcomeScreen = () => {
                 if (currentScreen === 0) {
                     if (backPressCount === 0) {
                         setBackPressCount(1);
-                        ToastAndroid.show('Tap again to Exit', ToastAndroid.SHORT);
+                        ToastAndroid.show(t('tap_again_to_exit'), ToastAndroid.SHORT);
                         setTimeout(() => setBackPressCount(0), 2000);
                         return true;
                     } else {
