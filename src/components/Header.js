@@ -5,12 +5,30 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { theme } from '../theme/theme';
 import { useDataContext } from '../service/DataContext';
+import { useTranslation } from 'react-i18next';
 
 export const Header = ({ title }) => {
+    const { t } = useTranslation();
     const Styles = useMemo(() => createStyles(theme), [theme]);
     const navigation = useNavigation();
     const { termsAccepted } = useDataContext();
     const route = useRoute();
+    const routeTitleMapping = {
+        "SplashScreen": "splash_screen",
+        "WelcomeScreen": "welcome_screen",
+        "DetailsScreen": "details_screen",
+        "Spin Master": "spin_master",
+        "CM Guide": "cm_guide",
+        "Tips": "tips",
+        "Spins": "spins",
+        "Collect Spin": "collect_spin",
+        "Settings": "settings",
+        "DefaultScreen": "default_screen",
+        "ErrorScreen": "error_screen",
+        "Language": "language"
+    };
+
+    const localizedTitle = t(routeTitleMapping[title] || title);
 
     const handleGoBack = () => {
         navigation.goBack();
@@ -38,11 +56,11 @@ export const Header = ({ title }) => {
             </View>
 
             <View style={Styles.titleContainer}>
-                <CustomText title={title} style={Styles.title} />
+                <CustomText title={localizedTitle} style={Styles.title} />
             </View>
 
             <View style={Styles.iconContainer}>
-                {!isMenu && termsAccepted  && (
+                {!isMenu && termsAccepted && (
                     <TouchableOpacity onPress={handleList}>
                         <Icon
                             name="cog"

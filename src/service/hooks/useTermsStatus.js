@@ -20,7 +20,7 @@ export const useTermsStatus = () => {
         try {
             await AsyncStorage.setItem('isTermsAccepted', value);
             setTermsAccepted(value);  
-            ToastAndroid.show("Welcome to Spin Master", ToastAndroid.SHORT);
+            ToastAndroid.show(t('welcome_to_spinmaster'), ToastAndroid.SHORT);
         } catch (e) {
             console.log("Error saving data to AsyncStorage", e);
         }

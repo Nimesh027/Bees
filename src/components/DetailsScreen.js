@@ -41,10 +41,10 @@ export const DetailsScreen = () => {
   const openLink = (url) => {
     if (url) {
       Linking.openURL(url).catch(() => {
-        Alert.alert(t('error'), t('failed_to_open_link'));
+        Alert.alert('Error', t('failed_to_open_link'));
       });
     } else {
-      Alert.alert(t('error'), t('no_url_rovide'));
+      Alert.alert('Error', t('no_url_rovide'));
     }
   };
 

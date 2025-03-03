@@ -13,6 +13,7 @@ export const DefaultScreen = ({ route }) => {
     const navigation = useNavigation();
     const { fetchData, playDetails, blogDetails, isConnected, termsAccepted } = useDataContext();
     const [loading, setLoading] = useState(false);
+    const [navigated, setNavigated] = useState(false); // To prevent multiple navigations
     const { screen } = route?.params || {};
     const prevIsConnected = useRef(isConnected);
 
@@ -21,6 +22,10 @@ export const DefaultScreen = ({ route }) => {
             prevIsConnected.current = isConnected; // Update ref to track state change
             if (isConnected) {
                 ToastAndroid.show(t('online'), ToastAndroid.SHORT);
+                if (!navigated) {
+                    setNavigated(true); // Prevent duplicate navigations
+                    handleRetry();
+                }
             }
         }
     }, [isConnected]);
@@ -63,6 +68,7 @@ export const DefaultScreen = ({ route }) => {
             setLoading(false);
         }
     };
+
     return (
         <View style={Styles.container}>
             {loading ? (

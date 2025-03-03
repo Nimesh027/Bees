@@ -19,14 +19,14 @@ export const Menu = () => {
 
     const openLink = (url) => {
         Linking.openURL(url).catch(() => {
-            Alert.alert('Error', 'Failed to open the link.');
+            Alert.alert('Error', t('fail_to_open_link'));
         });
     };
 
     const onShare = async (data) => {
         try {
             await Share.share({
-                message: `Check out this link: ${data}`,
+                message: `${t('check_out_this_link')} ${data}`,
             });
         } catch (error) {
             Alert.alert(error.message);
@@ -44,17 +44,17 @@ export const Menu = () => {
 
     const submitRating = async () => {
         if (rating === 0) {
-            Alert.alert('Please select a star rating.');
+            Alert.alert(t('select_star_rating'));
             return;
         }
         try {
             await AsyncStorage.setItem('userRating', JSON.stringify({ rating, feedback }));
-            ToastAndroid.show('Thank you! Your feedback has been saved.', ToastAndroid.SHORT);
+            ToastAndroid.show(t('thank_you_your_feedback_is_saved'), ToastAndroid.SHORT);
             setModalVisible(false);
             setRating(0);
             setFeedback('');
         } catch (error) {
-            ToastAndroid.show('Error! Failed to save feedback.', ToastAndroid.SHORT);
+            ToastAndroid.show(t('error_failed_to_save_feedback'), ToastAndroid.SHORT);
         }
     };
 
@@ -65,24 +65,24 @@ export const Menu = () => {
             icon: 'language',
             action: () => navigation.navigate('Language'),
         },
-        {
-            id: 'rate',
-            title: t('give_five_star'),
-            icon: 'star',
-            action: () => setModalVisible(true),
-        },
+        // {
+        //     id: 'rate',
+        //     title: t('give_five_star'),
+        //     icon: 'star',
+        //     action: () => setModalVisible(true),
+        // },
         {
             id: 'share',
             title: t('share_app'),
             icon: 'share-alt',
             action: () => onShare('https://rewards.coinmaster.com/rewards/rewards.html?c=pe_EMAILqPGdhZ_20241027')
         },
-        {
-            id: 'more_apps',
-            title: t('more_apps'),
-            icon: 'th-large',
-            action: () => console.log('More Apps')
-        },
+        // {
+        //     id: 'more_apps',
+        //     title: t('more_apps'),
+        //     icon: 'th-large',
+        //     action: () => console.log('More Apps')
+        // },
         {
             id: 'privacy_policy',
             title: t('privacy_and_policy'),
@@ -91,7 +91,7 @@ export const Menu = () => {
         },
         {
             id: 'feedback',
-            title: 'Send Feedback',
+            title: t('send_feedback'),
             icon: 'envelope',
             action: sendFeedback
         }

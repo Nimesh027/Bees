@@ -3,8 +3,8 @@ import { ScrollView, View, Share, StyleSheet, TouchableOpacity, Alert, Linking, 
 import { CustomText } from '../../commonComponents/CommonComponent';
 import { useDataContext } from '../../service/DataContext';
 import { theme } from '../../theme/theme';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Ensure this package is installed
-import Clipboard from '@react-native-clipboard/clipboard'; // Import Clipboard
+import Icon from 'react-native-vector-icons/FontAwesome'; 
+import Clipboard from '@react-native-clipboard/clipboard'; 
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
@@ -17,7 +17,7 @@ export const CollectLink = () => {
 
     const onShare = async (data) => {
         if (!isConnected) {
-            navigation.navigate('DefaultScreen', { screen: "Collect Spin" }); // Redirect to Offline Screen
+            navigation.navigate('DefaultScreen', { screen: "Collect Spin" }); 
             return;
         }
 
@@ -26,7 +26,7 @@ export const CollectLink = () => {
                 message: `${t('check_out_this_link')} ${data}`,
             });
         } catch (error) {
-            Alert.alert(t('error'), error.message);
+            Alert.alert('Error', error.message);
         }
     };
 
@@ -39,10 +39,10 @@ export const CollectLink = () => {
 
         if (url) {
             Linking.openURL(url).catch(() => {
-                Alert.alert(t('error'), t('fail_to_open_link'));
+                Alert.alert('Error', t('fail_to_open_link'));
             });
         } else {
-            Alert.alert(t('error'), t('no_url_provide'));
+            Alert.alert('Error', t('no_url_provide'));
         }
     };
 
@@ -61,7 +61,7 @@ export const CollectLink = () => {
                         <CustomText title={t('collect_your_reward')} style={Styles.headerText} />
                     </View>
                     <View style={Styles.stepsBox}>
-                        <CustomText title={collectedData?.rewards_text} style={Styles.problemTitle} />
+                        <CustomText title={t('tap_collect_button')} style={Styles.problemTitle} />
                     </View>
                     <View style={Styles.stepsBox}>
                         <View style={Styles.rowContainer}>

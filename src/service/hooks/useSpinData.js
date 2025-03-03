@@ -78,7 +78,7 @@ const useSpinData = (initialData) => {
     if (data) {
       setCollectedData(data)
     } else {
-      ToastAndroid.show('Error loading data', ToastAndroid.SHORT);
+      ToastAndroid.show(t('error_loading_data'), ToastAndroid.SHORT);
     }
   }
 

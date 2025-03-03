@@ -96,7 +96,7 @@ export const DailyBonus = ({ data }) => {
 
     const handleCard = () => {
         if (!isConnected) {
-            navigation.navigate('DefaultScreen', { screen: "Spins" });
+            navigation.navigate('DefaultScreen', { screen: "Spin Master" });
             return;
         }
         if (data) {
@@ -207,7 +207,7 @@ const createStyles = ({ text: { subheading, body }, colors: { primary, secondary
         },
         navigationButton: {
             height: width * 0.13,
-            width: width * 0.3,
+            width: width * 0.4,
             borderRadius: 5,
             backgroundColor: secondary,
             alignItems: 'center',
@@ -221,7 +221,7 @@ const createStyles = ({ text: { subheading, body }, colors: { primary, secondary
         buttonText: {
             color: background,
             fontWeight: 'bold',
-            fontSize: subheading.fontSize,
+            fontSize: body.fontSize,
             padding: width * 0.02,
             textTransform: 'uppercase',
         },

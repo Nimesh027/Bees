@@ -42,7 +42,7 @@ export const HomeScreen = () => {
   );
 
   const openLink = (url) => {
-    Linking.openURL(url).catch(() => Alert.alert(t('error'), t('failed_to_open_link')));
+    Linking.openURL(url).catch(() => Alert.alert('Error', t('failed_to_open_link')));
   };
 
   const handlePress = (screenName, index) => {
