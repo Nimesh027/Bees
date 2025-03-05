@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ToastAndroid } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export const useTermsStatus = () => {
-    const [termsAccepted, setTermsAccepted] = useState(null);  
+    const [termsAccepted, setTermsAccepted] = useState(null); 
+    const { t } = useTranslation(); 
 
     const getTermsAccepted = async () => {
         try {
