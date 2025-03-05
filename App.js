@@ -8,88 +8,26 @@ import { SplashScreen } from './src/components/SplashScreen';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { Header } from './src/components/Header';
 import { GuideScreen, Tip1Screen } from './src/components/Screens/GuideScreen';
-import { theme } from './src/theme/theme';
 import { SpinScreen } from './src/components/Screens/SpinScreen';
 import { WelcomeScreen } from './src/components/Screens/WelcomeScreen';
 import { DefaultScreen } from './src/components/Screens/DefaultScreen';
 import { ErrorScreen } from './src/components/Screens/ErrorScreen';
 import { DataProvider } from './src/service/DataContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Menu } from './src/components/Screens/Menu';
 import { CollectLink } from './src/components/Screens/CollectLink';
-import { PermissionsAndroid } from 'react-native';
-import messaging from '@react-native-firebase/messaging';
 import { Language } from './src/components/Screens/Language';
+import StatusBarManager from './src/commonComponents/StatusBarManager';
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
 
-  // const clearOnboardingStatus = async () => {
-  //   try {
-  //     await AsyncStorage.removeItem('isTermsAccepted');
-  //   } catch (error) {
-  //     console.log('Error clearing onboarding status:', error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   clearOnboardingStatus();
-  // }, []);
-
-  // useEffect(() => {
-  //   requestPermissionAndroid()
-  // }, [])
-
-  // const requestPermissionAndroid = async () => {
-  //   if (Platform.OS === 'android' && Platform.Version >= 33) {
-  //     try {
-  //       const granted = await PermissionsAndroid.request(
-  //         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-  //       );
-  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //         console.log("✅ Notification Permission Granted");
-  //         getToken();
-  //       } else {
-  //         console.log("❌ Notification Permission Denied");
-  //       }
-  //     } catch (err) {
-  //       console.warn("Error requesting permissions:", err);
-  //     }
-  //   } else {
-  //     console.log("Skipping permission request for API < 33");
-  //     getToken(); // Call getToken directly for older Android versions
-  //   }
-  // };
-
-
-  // useEffect(() => {
-  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
-  //     console.log("FCM Message Received in Foreground: ", remoteMessage);
-  //     Alert.alert('New Notification', remoteMessage.notification?.title || 'No Title');
-  //   });
-
-  //   return () => {
-  //     console.log("Cleaning up foreground messaging listener...");
-  //     unsubscribe();
-  //   };
-  // }, []);
-
-  // const getToken = async () => {
-  //   try {
-  //     const token = await messaging().getToken();
-  //     console.log("✅ Token is:", token);
-  //   } catch (error) {
-  //     console.error("❌ Error getting FCM token:", error);
-  //   }
-  // };
-
-
   return (
     <ThemeProvider>
       <DataProvider>
+          <StatusBarManager />
         <NavigationContainer>
-          <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
+          <StatusBar backgroundColor="#8A2BE2" barStyle="light-content" />
           <Stack.Navigator
             screenOptions={({ route }) => ({
               header: ({ navigation }) => (

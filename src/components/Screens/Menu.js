@@ -34,7 +34,7 @@ export const Menu = () => {
     };
 
     const sendFeedback = () => {
-        const email = 'yarar26848@lineacr.com';
+        const email = 'support@coinmasterfreespin.tech';
         const subject = 'Feedback';
         const body = 'Hello, I would like to provide the following feedback:';
 
