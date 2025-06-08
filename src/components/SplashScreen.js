@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StatusBar, View, ActivityIndicator, StyleSheet, Platform, Image } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform, Image } from 'react-native';
 import { CustomText } from '../commonComponents/CommonComponent';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../theme/theme';
@@ -68,7 +68,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF', 
-    paddingTop: Platform.OS === 'ios' ? 0 : StatusBar.currentHeight, 
   },
   logo: {
     width: 120,  // Same size as the previous icon

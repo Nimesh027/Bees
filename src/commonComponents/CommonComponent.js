@@ -96,7 +96,7 @@ export const DailyBonus = ({ data }) => {
 
     const handleCard = () => {
         if (!isConnected) {
-            navigation.navigate('DefaultScreen', { screen: "Spin Master" });
+            navigation.replace('DefaultScreen', { screen: "Spins" });
             return;
         }
         if (data) {

@@ -1,4 +1,7 @@
 {
   "name": "Reward",
-  "displayName": "Reward"
+  "displayName": "Reward",
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-4241920534057829~3295687063"
+  }
 }

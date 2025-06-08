@@ -1,12 +1,17 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 import { ScrollView, View, Share, StyleSheet, TouchableOpacity, Alert, Linking, ToastAndroid } from 'react-native';
 import { CustomText } from '../../commonComponents/CommonComponent';
 import { useDataContext } from '../../service/DataContext';
 import { theme } from '../../theme/theme';
-import Icon from 'react-native-vector-icons/FontAwesome'; 
-import Clipboard from '@react-native-clipboard/clipboard'; 
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Clipboard from '@react-native-clipboard/clipboard';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { BannerAd, BannerAdSize, TestIds, RewardedAd, RewardedAdEventType, AdEventType } from 'react-native-google-mobile-ads';
+
+// Ad Configuration
+const bannerAdUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-4241920534057829/5350998591';
+const rewardedAdUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-4241920534057829/8764222895';
 
 export const CollectLink = () => {
     const { t } = useTranslation();
@@ -14,10 +19,95 @@ export const CollectLink = () => {
     const navigation = useNavigation();
     const Styles = useMemo(() => createStyles(theme), [theme]);
     const { collectedData } = useDataContext();
+    const [bannerAdError, setBannerAdError] = useState(false);
+    const [isProcessingAction, setIsProcessingAction] = useState(false);
+    const currentActionRef = useRef(null);
+    const currentDataRef = useRef(null);
+    const rewardedAdRef = useRef(null);
 
-    const onShare = async (data) => {
+    const initializeRewardedAd = () => {
+        // Clean up previous ad if exists
+        if (rewardedAdRef.current) {
+            const ad = rewardedAdRef.current.ad;
+            ad.removeAllListeners(RewardedAdEventType.LOADED);
+            ad.removeAllListeners(RewardedAdEventType.EARNED_REWARD);
+            ad.removeAllListeners(AdEventType.CLOSED);
+            ad.removeAllListeners(AdEventType.ERROR);
+        }
+
+        // Create new rewarded ad instance
+        const ad = RewardedAd.createForAdRequest(rewardedAdUnitId, {
+            requestNonPersonalizedAdsOnly: true,
+            keywords: ['rewards', 'coupons', 'bonus'],
+        });
+
+        // Set up event listeners
+        const loadedListener = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
+        });
+
+        const earnedListener = ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
+        });
+
+        const closedListener = ad.addAdEventListener(AdEventType.CLOSED, () => {
+            // Only perform action after user manually closes the ad
+            performActionAfterAd();
+            // Prepare for next ad
+            initializeRewardedAd();
+            setIsProcessingAction(false);
+        });
+
+        const errorListener = ad.addAdEventListener(AdEventType.ERROR, (error) => {
+            console.warn('Rewarded ad error:', error);
+            // If ad fails to load, perform action immediately
+            performActionAfterAd();
+            setIsProcessingAction(false);
+            // Try to load another ad for next time
+            initializeRewardedAd();
+        });
+
+        // Start loading the ad
+        ad.load();
+
+        rewardedAdRef.current = {
+            ad,
+            listeners: {
+                loaded: loadedListener,
+                earned: earnedListener,
+                closed: closedListener,
+                error: errorListener
+            }
+        };
+    };
+
+    // Initialize rewarded ad on component mount
+    useEffect(() => {
+        initializeRewardedAd();
+        return () => {
+            // Clean up on unmount
+            if (rewardedAdRef.current) {
+                const { ad, listeners } = rewardedAdRef.current;
+                ad.removeAllListeners(RewardedAdEventType.LOADED, listeners.loaded);
+                ad.removeAllListeners(RewardedAdEventType.EARNED_REWARD, listeners.earned);
+                ad.removeAllListeners(AdEventType.CLOSED, listeners.closed);
+                ad.removeAllListeners(AdEventType.ERROR, listeners.error);
+            }
+        };
+    }, []);
+
+    const performActionAfterAd = () => {
+        const action = currentActionRef.current;
+        const data = currentDataRef.current;
+
+        if (action === 'share') {
+            handleShare(data);
+        } else if (action === 'collect') {
+            handleCollect(data);
+        }
+    };
+
+    const handleShare = async (data) => {
         if (!isConnected) {
-            navigation.navigate('DefaultScreen', { screen: "Collect Spin" }); 
+            navigation.replace('DefaultScreen', { screen: "Collect Spin" });
             return;
         }
 
@@ -30,10 +120,9 @@ export const CollectLink = () => {
         }
     };
 
-    // Function to open link with offline check
-    const openLink = (url) => {
+    const handleCollect = (url) => {
         if (!isConnected) {
-            navigation.navigate('DefaultScreen', { screen: "Collect Spin" }); // Redirect to Offline Screen
+            navigation.replace('DefaultScreen', { screen: "Collect Spin" });
             return;
         }
 
@@ -46,10 +135,41 @@ export const CollectLink = () => {
         }
     };
 
-    // Function to copy the coupon code to clipboard and show a toast
+    const triggerActionWithAd = (actionType, data) => {
+        if (isProcessingAction) return; // Prevent multiple clicks
+
+        setIsProcessingAction(true);
+        currentActionRef.current = actionType;
+        currentDataRef.current = data;
+
+        if (rewardedAdRef.current?.ad?.loaded) {
+            rewardedAdRef.current.ad.show()
+                .catch(error => {
+                    console.warn('Failed to show ad:', error);
+                    // If showing fails, perform action and reset
+                    performActionAfterAd();
+                    setIsProcessingAction(false);
+                    initializeRewardedAd();
+                });
+        } else {
+            // If ad isn't loaded, perform action immediately and load new ad
+            performActionAfterAd();
+            setIsProcessingAction(false);
+            initializeRewardedAd();
+        }
+    };
+
+    const onShare = async (data) => {
+        triggerActionWithAd('share', data);
+    };
+
+    const openLink = (url) => {
+        triggerActionWithAd('collect', url);
+    };
+
     const copyToClipboard = (text) => {
-        Clipboard.setString(text); // Copy text to clipboard
-        ToastAndroid.show(t('text_copy'), ToastAndroid.SHORT); // Show toast notification
+        Clipboard.setString(text);
+        ToastAndroid.show(t('text_copy'), ToastAndroid.SHORT);
     };
 
     return (
@@ -79,13 +199,48 @@ export const CollectLink = () => {
                         </View>
                     </View>
                 </View>
+                {/* Banner Ad */}
+                <View style={Styles.adContainer}>
+                    <BannerAd
+                        unitId={bannerAdUnitId}
+                        size={BannerAdSize.MEDIUM_RECTANGLE}
+                        requestOptions={{
+                            requestNonPersonalizedAdsOnly: true,
+                            keywords: ['coupons', 'rewards', 'shopping', 'deals'],
+                        }}
+                        onAdLoaded={() => setBannerAdError(false)}
+                        onAdFailedToLoad={(error) => {
+                            console.warn('Banner ad failed to load:', error);
+                            setBannerAdError(true);
+                        }}
+                    />
+                    {bannerAdError && (
+                        <View style={Styles.adPlaceholder}>
+                            <CustomText title={t('ad_loading')} style={Styles.adPlaceholderText} />
+                        </View>
+                    )}
+                </View>
             </ScrollView>
 
             <View style={Styles.iconContainer}>
-                <TouchableOpacity style={Styles.Sharebutton} onPress={() => onShare(collectedData?.rewards_link)}>
+                <TouchableOpacity
+                    style={[
+                        Styles.Sharebutton,
+                        isProcessingAction && Styles.disabledButton
+                    ]}
+                    onPress={() => onShare(collectedData?.rewards_link)}
+                    disabled={isProcessingAction}
+                >
                     <CustomText title={t('share')} style={Styles.SharebuttonText} />
                 </TouchableOpacity>
-                <TouchableOpacity style={Styles.Collectbutton} onPress={() => openLink(collectedData?.rewards_link)}>
+                <TouchableOpacity
+                    style={[
+                        Styles.Collectbutton,
+                        isProcessingAction && Styles.disabledButton
+                    ]}
+                    onPress={() => openLink(collectedData?.rewards_link)}
+                    disabled={isProcessingAction}
+                >
                     <CustomText title={t('collect')} style={Styles.CollectbuttonText} />
                 </TouchableOpacity>
             </View>
@@ -101,6 +256,7 @@ const createStyles = ({ text: { heading, body, subheading }, colors: { primary, 
         },
         scrollContainer: {
             padding: width * 0.03,
+            paddingBottom: width * 0.15, // Extra padding for the absolute positioned buttons
         },
         cardContainer: {
             marginBottom: width * 0.02,
@@ -180,6 +336,10 @@ const createStyles = ({ text: { heading, body, subheading }, colors: { primary, 
             borderTopWidth: 1,
             borderColor: primary,
             backgroundColor: background,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
         },
         Sharebutton: {
             flex: 1,
@@ -235,6 +395,30 @@ const createStyles = ({ text: { heading, body, subheading }, colors: { primary, 
             backgroundColor: secondary,
             marginHorizontal: 10,
         },
+        adContainer: {
+            width: '100%',
+            minHeight: 250, // Fixed height for better alignment
+            minHeight: 100, // Minimum height to prevent layout shift
+            backgroundColor: background,
+            borderColor: primary,
+            borderWidth: 1,
+            borderRadius: width * 0.025,
+            marginVertical: width * 0.03,
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+        },
+        adPlaceholder: {
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: background,
+        },
+        adPlaceholderText: {
+            fontSize: body.fontSize,
+            color: secondary,
+            textAlign: 'center',
+        },
     });
 };
-

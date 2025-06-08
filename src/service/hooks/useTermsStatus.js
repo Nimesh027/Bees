@@ -14,7 +14,6 @@ export const useTermsStatus = () => {
                 setTermsAccepted(value);
             }
         } catch (e) {
-            console.log("Error retrieving data from AsyncStorage", e);
         }
     };
 
@@ -24,7 +23,6 @@ export const useTermsStatus = () => {
             setTermsAccepted(value);  
             ToastAndroid.show(t('welcome_to_spinmaster'), ToastAndroid.SHORT);
         } catch (e) {
-            console.log("Error saving data to AsyncStorage", e);
         }
     };
 
