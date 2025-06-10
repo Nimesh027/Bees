@@ -72,7 +72,7 @@ export const SpinScreen = () => {
                         size={BannerAdSize.BANNER}
                         requestOptions={{
                             requestNonPersonalizedAdsOnly: true,
-                            keywords: ['games', 'casino', 'free spins'],
+                            keywords: ['games', 'casino', 'coupons', 'rewards', 'shopping', 'deals'],
                         }}
                         onAdLoaded={handleAdLoad}
                         onAdFailedToLoad={handleAdError}
@@ -119,7 +119,7 @@ const createStyles = ({
             left: 0,
             right: 0,
             backgroundColor: background,
-            padding: width * 0.02,
+            padding: width * 0.01,
             borderTopWidth: 1,
             borderTopColor: accent,
             alignItems: 'center',

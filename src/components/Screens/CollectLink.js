@@ -8,6 +8,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { BannerAd, BannerAdSize, TestIds, RewardedAd, RewardedAdEventType, AdEventType } from 'react-native-google-mobile-ads';
+import NetInfo from '@react-native-community/netinfo';
 
 // Ad Configuration
 const bannerAdUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-4241920534057829/5350998591';
@@ -15,7 +16,7 @@ const rewardedAdUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-42419205340578
 
 export const CollectLink = () => {
     const { t } = useTranslation();
-    const { isConnected } = useDataContext();
+    const { isConnected, checkNetworkConnection } = useDataContext();
     const navigation = useNavigation();
     const Styles = useMemo(() => createStyles(theme), [theme]);
     const { collectedData } = useDataContext();
@@ -24,6 +25,7 @@ export const CollectLink = () => {
     const currentActionRef = useRef(null);
     const currentDataRef = useRef(null);
     const rewardedAdRef = useRef(null);
+    const isMountedRef = useRef(true);
 
     const initializeRewardedAd = () => {
         // Clean up previous ad if exists
@@ -43,12 +45,17 @@ export const CollectLink = () => {
 
         // Set up event listeners
         const loadedListener = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
+            console.log('Rewarded ad loaded');
         });
 
         const earnedListener = ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
+            console.log('User earned reward');
         });
 
         const closedListener = ad.addAdEventListener(AdEventType.CLOSED, () => {
+            console.log('Ad closed');
+            if (!isMountedRef.current) return;
+            
             // Only perform action after user manually closes the ad
             performActionAfterAd();
             // Prepare for next ad
@@ -57,7 +64,9 @@ export const CollectLink = () => {
         });
 
         const errorListener = ad.addAdEventListener(AdEventType.ERROR, (error) => {
-            console.warn('Rewarded ad error:', error);
+            if (!isMountedRef.current) return;
+            
+            console.log('Rewarded ad error:', error.message);
             // If ad fails to load, perform action immediately
             performActionAfterAd();
             setIsProcessingAction(false);
@@ -81,9 +90,12 @@ export const CollectLink = () => {
 
     // Initialize rewarded ad on component mount
     useEffect(() => {
+        isMountedRef.current = true;
         initializeRewardedAd();
+        
         return () => {
             // Clean up on unmount
+            isMountedRef.current = false;
             if (rewardedAdRef.current) {
                 const { ad, listeners } = rewardedAdRef.current;
                 ad.removeAllListeners(RewardedAdEventType.LOADED, listeners.loaded);
@@ -94,80 +106,114 @@ export const CollectLink = () => {
         };
     }, []);
 
-    const performActionAfterAd = () => {
+    const checkNetworkBeforeAction = async () => {
+        try {
+            const state = await NetInfo.fetch();
+            if (!state.isConnected) {
+                navigation.replace('DefaultScreen', { screen: "Collect Spin" });
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.log('Network check error:', error);
+            navigation.replace('DefaultScreen', { screen: "Collect Spin" });
+            return false;
+        }
+    };
+
+    const performActionAfterAd = async () => {
         const action = currentActionRef.current;
         const data = currentDataRef.current;
 
-        if (action === 'share') {
-            handleShare(data);
-        } else if (action === 'collect') {
-            handleCollect(data);
+        if (!data) {
+            Alert.alert(t('error'), t('no_data_provided'));
+            return;
+        }
+
+        const hasNetwork = await checkNetworkBeforeAction();
+        if (!hasNetwork) return;
+
+        try {
+            if (action === 'share') {
+                await handleShare(data);
+            } else if (action === 'collect') {
+                await handleCollect(data);
+            }
+        } catch (error) {
+            console.log('Action error:', error.message);
+            Alert.alert(t('error'), t('action_failed'));
         }
     };
 
     const handleShare = async (data) => {
-        if (!isConnected) {
-            navigation.replace('DefaultScreen', { screen: "Collect Spin" });
-            return;
-        }
-
         try {
-            await Share.share({
+            const result = await Share.share({
                 message: `${t('check_out_this_link')} ${data}`,
             });
+
+            if (result.action === Share.sharedAction) {
+                ToastAndroid.show(t('shared_successfully'), ToastAndroid.SHORT);
+            }
         } catch (error) {
-            Alert.alert('Error', error.message);
+            console.log('Share error:', error.message);
+            Alert.alert(t('error'), t('share_failed'));
         }
     };
 
-    const handleCollect = (url) => {
-        if (!isConnected) {
-            navigation.replace('DefaultScreen', { screen: "Collect Spin" });
-            return;
-        }
+    const handleCollect = async (url) => {
+        try {
+            const canOpen = await Linking.canOpenURL(url);
+            if (!canOpen) {
+                throw new Error('Invalid URL');
+            }
 
-        if (url) {
-            Linking.openURL(url).catch(() => {
-                Alert.alert('Error', t('fail_to_open_link'));
-            });
-        } else {
-            Alert.alert('Error', t('no_url_provide'));
+            await Linking.openURL(url);
+        } catch (error) {
+            console.log('Open URL error:', error.message);
+            Alert.alert(t('error'), t('fail_to_open_link'));
         }
     };
 
-    const triggerActionWithAd = (actionType, data) => {
+    const triggerActionWithAd = async (actionType, data) => {
         if (isProcessingAction) return; // Prevent multiple clicks
+
+        const hasNetwork = await checkNetworkBeforeAction();
+        if (!hasNetwork) return;
 
         setIsProcessingAction(true);
         currentActionRef.current = actionType;
         currentDataRef.current = data;
 
-        if (rewardedAdRef.current?.ad?.loaded) {
-            rewardedAdRef.current.ad.show()
-                .catch(error => {
-                    console.warn('Failed to show ad:', error);
-                    // If showing fails, perform action and reset
-                    performActionAfterAd();
-                    setIsProcessingAction(false);
-                    initializeRewardedAd();
-                });
-        } else {
-            // If ad isn't loaded, perform action immediately and load new ad
-            performActionAfterAd();
+        try {
+            if (rewardedAdRef.current?.ad?.loaded) {
+                await rewardedAdRef.current.ad.show();
+            } else {
+                // If ad isn't loaded, perform action immediately and load new ad
+                await performActionAfterAd();
+                setIsProcessingAction(false);
+                initializeRewardedAd();
+            }
+        } catch (error) {
+            console.log('Ad show error:', error.message);
+            await performActionAfterAd();
             setIsProcessingAction(false);
             initializeRewardedAd();
         }
     };
 
     const onShare = async (data) => {
-        triggerActionWithAd('share', data);
+        await triggerActionWithAd('share', data);
     };
 
-    const openLink = (url) => {
-        triggerActionWithAd('collect', url);
+    const openLink = async (url) => {
+        await triggerActionWithAd('collect', url);
     };
 
     const copyToClipboard = (text) => {
+        if (!text) {
+            Alert.alert(t('error'), t('no_text_to_copy'));
+            return;
+        }
         Clipboard.setString(text);
         ToastAndroid.show(t('text_copy'), ToastAndroid.SHORT);
     };
@@ -210,7 +256,7 @@ export const CollectLink = () => {
                         }}
                         onAdLoaded={() => setBannerAdError(false)}
                         onAdFailedToLoad={(error) => {
-                            console.warn('Banner ad failed to load:', error);
+                            console.log('Banner ad failed to load:', error.message);
                             setBannerAdError(true);
                         }}
                     />
@@ -256,7 +302,7 @@ const createStyles = ({ text: { heading, body, subheading }, colors: { primary, 
         },
         scrollContainer: {
             padding: width * 0.03,
-            paddingBottom: width * 0.15, // Extra padding for the absolute positioned buttons
+            paddingBottom: width * 0.15,
         },
         cardContainer: {
             marginBottom: width * 0.02,
@@ -383,6 +429,9 @@ const createStyles = ({ text: { heading, body, subheading }, colors: { primary, 
             textTransform: 'uppercase',
             letterSpacing: 1,
         },
+        disabledButton: {
+            opacity: 0.6,
+        },
         rowContainer: {
             flexDirection: 'row',
             justifyContent: 'center',
@@ -397,8 +446,7 @@ const createStyles = ({ text: { heading, body, subheading }, colors: { primary, 
         },
         adContainer: {
             width: '100%',
-            minHeight: 250, // Fixed height for better alignment
-            minHeight: 100, // Minimum height to prevent layout shift
+            minHeight: 250,
             backgroundColor: background,
             borderColor: primary,
             borderWidth: 1,
