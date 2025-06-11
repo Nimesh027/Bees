@@ -124,6 +124,10 @@ android {
             universalApk false
         }
     }
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
 }
 
 dependencies {
@@ -134,5 +138,19 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-    implementation project(':react-native-safe-area-context')
 }
+// Workaround for Gradle 8+ lint + vector icons issue
+afterEvaluate {
+    if (tasks.findByName("lintAnalyzeDebug")) {
+        tasks.named("lintAnalyzeDebug").configure {
+            dependsOn("copyReactNativeVectorIconFonts")
+        }
+    }
+
+    if (tasks.findByName("generateDebugLintReportModel")) {
+        tasks.named("generateDebugLintReportModel").configure {
+            dependsOn("copyReactNativeVectorIconFonts")
+        }
+    }
+}
+

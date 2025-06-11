@@ -69,6 +69,13 @@
     "default_screen": "หน้าจอเริ่มต้น",
     "error_screen": "หน้าจอข้อผิดพลาด",
     "language": "ภาษา",
-    "tap_collect_button": "แตะปุ่มรวบรวมเพื่อรับโบนัสและเริ่มเล่น!"
+    "tap_collect_button": "แตะปุ่มรวบรวมเพื่อรับโบนัสและเริ่มเล่น!",
+    "no_data_provided": "ไม่มีข้อมูลให้",
+    "action_failed": "การดำเนินการล้มเหลว",
+    "share_failed": "การแชร์ล้มเหลว",
+    "no_text_to_copy": "ไม่มีข้อความให้คัดลอก",
+    "ad_failed": "การเพิ่มล้มเหลว",
+    "ad_failed_to_load": "โฆษณาไม่สามารถโหลดได้",
+    "external_link_failed": "ลิงก์ภายนอกล้มเหลว"
   }
   

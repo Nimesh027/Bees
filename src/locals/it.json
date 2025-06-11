@@ -69,6 +69,13 @@
   "default_screen": "Predefinito",
   "error_screen": "Errore",
   "language": "Lingua",
-  "tap_collect_button": "Tocca il pulsante Raccogli per richiedere il tuo bonus e iniziare a giocare!"
+  "tap_collect_button": "Tocca il pulsante Raccogli per richiedere il tuo bonus e iniziare a giocare!",
+  "no_data_provided": "Nessun dato fornito",
+  "action_failed": "Azione fallita",
+  "share_failed": "Condivisione fallita",
+  "no_text_to_copy": "Nessun testo da copiare",
+  "ad_failed": "Aggiunta fallita",
+  "ad_failed_to_load": "Annuncio non caricato",
+  "external_link_failed": "Link esterno fallito"
   }
   

@@ -69,5 +69,12 @@
   "default_screen": "Pantalla predeterminada",
   "error_screen": "Pantalla de error",
   "language": "Idioma",
-  "tap_collect_button": "Toca el botón de recoger para reclamar tu bono y empezar a jugar!"
+  "tap_collect_button": "Toca el botón de recoger para reclamar tu bono y empezar a jugar!",
+  "no_data_provided": "No se proporcionaron datos",
+  "action_failed": "Acción fallida",
+  "share_failed": "Compartir falló",
+  "no_text_to_copy": "No hay texto para copiar",
+  "ad_failed": "Agregar falló",
+  "ad_failed_to_load": "El anuncio no se pudo cargar",
+  "external_link_failed": "Enlace externo falló"
 }

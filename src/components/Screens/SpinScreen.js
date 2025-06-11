@@ -15,6 +15,7 @@ export const SpinScreen = () => {
     const Styles = useMemo(() => createStyles(theme), [theme]);
     const [adLoaded, setAdLoaded] = useState(false);
     const [adError, setAdError] = useState(null);
+    const [bannerAdLoading, setBannerAdLoading] = useState(true);
 
     // Track ad load attempts
     useEffect(() => {
@@ -30,12 +31,13 @@ export const SpinScreen = () => {
     const handleAdLoad = () => {
         setAdLoaded(true);
         setAdError(null);
+        setBannerAdLoading(false);
     };
 
     const handleAdError = (error) => {
         setAdLoaded(false);
         setAdError(t('ad_failed_to_load'));
-        console.error('Ad failed to load:', error);
+        setBannerAdLoading(false);
     };
 
     if (!spinData || spinData.length === 0) {
@@ -59,24 +61,27 @@ export const SpinScreen = () => {
 
             {/* Fixed Banner Ad at Bottom */}
             <View style={Styles.adContainer}>
-                {adError ? (
+                {bannerAdLoading && (
                     <View style={Styles.adPlaceholder}>
-                        <CustomText 
-                            title={t('ad_failed_to_load')} 
-                            style={Styles.errorText} 
-                        />
+                        <CustomText title="Loading..." style={Styles.errorText} />
                     </View>
-                ) : (
+                )}
+                {!adError && (
                     <BannerAd
                         unitId={bannerAdUnitId}
-                        size={BannerAdSize.BANNER}
+                        size={BannerAdSize.FULL_BANNER}
                         requestOptions={{
                             requestNonPersonalizedAdsOnly: true,
-                            keywords: ['games', 'casino', 'coupons', 'rewards', 'shopping', 'deals'],
+                            keywords: ['games', 'gaming', 'mobile gaming', 'entertainment', 'rewards', 'shopping', 'lifestyle', 'technology'],
                         }}
                         onAdLoaded={handleAdLoad}
                         onAdFailedToLoad={handleAdError}
                     />
+                )}
+                {adError && !bannerAdLoading && (
+                    <View style={Styles.adPlaceholder}>
+                        <CustomText title={t('ad_failed_to_load')} style={Styles.errorText} />
+                    </View>
                 )}
             </View>
         </View>
@@ -132,6 +137,7 @@ const createStyles = ({
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: background,
+            position: 'absolute',
         },
         errorText: {
             color: secondary,

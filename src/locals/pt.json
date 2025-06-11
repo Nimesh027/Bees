@@ -69,6 +69,13 @@
     "default_screen": "Padrão",
     "error_screen": "Erro",
     "language": "Idioma",
-    "tap_collect_button": "Toque no botão Coletar para resgatar seu bônus e começar a jogar!"
+    "tap_collect_button": "Toque no botão Coletar para resgatar seu bônus e começar a jogar!",
+    "no_data_provided": "Nenhum dado fornecido",
+    "action_failed": "Ação falhou",
+    "share_failed": "Compartilhamento falhou",
+    "no_text_to_copy": "Nenhum texto para copiar",
+    "ad_failed": "Adição falhou",
+    "ad_failed_to_load": "Anúncio não carregado",
+    "external_link_failed": "Link externo falhou"
   }
   

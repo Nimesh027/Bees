@@ -69,5 +69,12 @@
   "default_screen": "Standardbildschirm",
   "error_screen": "Fehlerbildschirm",
   "language": "Sprache",
-  "tap_collect_button": "Tippe auf die Sammeln-Taste, um deinen Bonus zu erhalten und zu spielen!"
+  "tap_collect_button": "Tippe auf die Sammeln-Taste, um deinen Bonus zu erhalten und zu spielen!",
+  "no_data_provided": "Keine Daten bereitgestellt",
+  "action_failed": "Aktion fehlgeschlagen",
+  "share_failed": "Teilen fehlgeschlagen",
+  "no_text_to_copy": "Kein Text zum Kopieren",
+  "ad_failed": "Hinzufügen fehlgeschlagen",
+  "ad_failed_to_load": "Anzeige konnte nicht geladen werden",
+  "external_link_failed": "Externer Link fehlgeschlagen"
 }

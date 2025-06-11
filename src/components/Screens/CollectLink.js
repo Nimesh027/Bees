@@ -1,5 +1,5 @@
-import React, { useMemo, useEffect, useState, useRef } from 'react';
-import { ScrollView, View, Share, StyleSheet, TouchableOpacity, Alert, Linking, ToastAndroid } from 'react-native';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
+import { ScrollView, View, Share, StyleSheet, TouchableOpacity, Alert, Linking, ToastAndroid, Modal, ActivityIndicator } from 'react-native';
 import { CustomText } from '../../commonComponents/CommonComponent';
 import { useDataContext } from '../../service/DataContext';
 import { theme } from '../../theme/theme';
@@ -13,6 +13,7 @@ import NetInfo from '@react-native-community/netinfo';
 // Ad Configuration
 const bannerAdUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-4241920534057829/5350998591';
 const rewardedAdUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-4241920534057829/8764222895';
+const AD_LOAD_TIMEOUT = 5000; // 4 seconds timeout for ad loading
 
 export const CollectLink = () => {
     const { t } = useTranslation();
@@ -22,87 +23,16 @@ export const CollectLink = () => {
     const { collectedData } = useDataContext();
     const [bannerAdError, setBannerAdError] = useState(false);
     const [isProcessingAction, setIsProcessingAction] = useState(false);
+    const [bannerAdLoading, setBannerAdLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const currentActionRef = useRef(null);
     const currentDataRef = useRef(null);
-    const rewardedAdRef = useRef(null);
     const isMountedRef = useRef(true);
 
-    const initializeRewardedAd = () => {
-        // Clean up previous ad if exists
-        if (rewardedAdRef.current) {
-            const ad = rewardedAdRef.current.ad;
-            ad.removeAllListeners(RewardedAdEventType.LOADED);
-            ad.removeAllListeners(RewardedAdEventType.EARNED_REWARD);
-            ad.removeAllListeners(AdEventType.CLOSED);
-            ad.removeAllListeners(AdEventType.ERROR);
-        }
-
-        // Create new rewarded ad instance
-        const ad = RewardedAd.createForAdRequest(rewardedAdUnitId, {
-            requestNonPersonalizedAdsOnly: true,
-            keywords: ['rewards', 'coupons', 'bonus'],
-        });
-
-        // Set up event listeners
-        const loadedListener = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
-            console.log('Rewarded ad loaded');
-        });
-
-        const earnedListener = ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
-            console.log('User earned reward');
-        });
-
-        const closedListener = ad.addAdEventListener(AdEventType.CLOSED, () => {
-            console.log('Ad closed');
-            if (!isMountedRef.current) return;
-            
-            // Only perform action after user manually closes the ad
-            performActionAfterAd();
-            // Prepare for next ad
-            initializeRewardedAd();
-            setIsProcessingAction(false);
-        });
-
-        const errorListener = ad.addAdEventListener(AdEventType.ERROR, (error) => {
-            if (!isMountedRef.current) return;
-            
-            console.log('Rewarded ad error:', error.message);
-            // If ad fails to load, perform action immediately
-            performActionAfterAd();
-            setIsProcessingAction(false);
-            // Try to load another ad for next time
-            initializeRewardedAd();
-        });
-
-        // Start loading the ad
-        ad.load();
-
-        rewardedAdRef.current = {
-            ad,
-            listeners: {
-                loaded: loadedListener,
-                earned: earnedListener,
-                closed: closedListener,
-                error: errorListener
-            }
-        };
-    };
-
-    // Initialize rewarded ad on component mount
     useEffect(() => {
         isMountedRef.current = true;
-        initializeRewardedAd();
-        
         return () => {
-            // Clean up on unmount
             isMountedRef.current = false;
-            if (rewardedAdRef.current) {
-                const { ad, listeners } = rewardedAdRef.current;
-                ad.removeAllListeners(RewardedAdEventType.LOADED, listeners.loaded);
-                ad.removeAllListeners(RewardedAdEventType.EARNED_REWARD, listeners.earned);
-                ad.removeAllListeners(AdEventType.CLOSED, listeners.closed);
-                ad.removeAllListeners(AdEventType.ERROR, listeners.error);
-            }
         };
     }, []);
 
@@ -115,9 +45,96 @@ export const CollectLink = () => {
             }
             return true;
         } catch (error) {
-            console.log('Network check error:', error);
             navigation.replace('DefaultScreen', { screen: "Collect Spin" });
             return false;
+        }
+    };
+
+    const loadAndShowRewardedAd = async (actionType, data) => {
+        if (isProcessingAction) return;
+
+        const hasNetwork = await checkNetworkBeforeAction();
+        if (!hasNetwork) return;
+
+        setIsProcessingAction(true);
+        setLoading(true);
+        currentActionRef.current = actionType;
+        currentDataRef.current = data;
+
+        // Create new rewarded ad instance
+        const ad = RewardedAd.createForAdRequest(rewardedAdUnitId, {
+            requestNonPersonalizedAdsOnly: true,
+            keywords: ['mobile gaming', 'rewards', 'app installs', 'subscriptions', 'ecommerce', 'promotions', 'incentives', 'digital offers'],
+        });
+
+        let timeoutId = null;
+        let hasAdLoaded = false;
+
+        // Set up timeout to perform action if ad doesn't load in 4 seconds
+        timeoutId = setTimeout(() => {
+            if (!hasAdLoaded && isMountedRef.current) {
+                performActionAfterAd();
+                setIsProcessingAction(false);
+                setLoading(false);
+                cleanupListeners();
+            }
+        }, AD_LOAD_TIMEOUT);
+
+        // Set up event listeners
+        const loadedListener = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
+            hasAdLoaded = true;
+            clearTimeout(timeoutId);
+            if (isMountedRef.current) {
+                setLoading(false);
+                ad.show().catch(error => {
+                    performActionAfterAd();
+                    setIsProcessingAction(false);
+                    setLoading(false);
+                    cleanupListeners();
+                });
+            }
+        });
+
+        const earnedListener = ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
+        });
+
+        const closedListener = ad.addAdEventListener(AdEventType.CLOSED, () => {
+            if (isMountedRef.current) {
+                performActionAfterAd();
+                setIsProcessingAction(false);
+                setLoading(false);
+            }
+            cleanupListeners();
+        });
+
+        const errorListener = ad.addAdEventListener(AdEventType.ERROR, (error) => {
+            clearTimeout(timeoutId);
+            if (isMountedRef.current) {
+                performActionAfterAd();
+                setIsProcessingAction(false);
+                setLoading(false);
+            }
+            cleanupListeners();
+        });
+
+        const cleanupListeners = () => {
+            loadedListener();
+            earnedListener();
+            closedListener();
+            errorListener();
+        };
+
+        // Start loading the ad
+        try {
+            ad.load();
+        } catch (error) {
+            clearTimeout(timeoutId);
+            if (isMountedRef.current) {
+                performActionAfterAd();
+                setIsProcessingAction(false);
+                setLoading(false);
+            }
+            cleanupListeners();
         }
     };
 
@@ -127,11 +144,10 @@ export const CollectLink = () => {
 
         if (!data) {
             Alert.alert(t('error'), t('no_data_provided'));
+            setIsProcessingAction(false);
+            setLoading(false);
             return;
         }
-
-        const hasNetwork = await checkNetworkBeforeAction();
-        if (!hasNetwork) return;
 
         try {
             if (action === 'share') {
@@ -140,8 +156,10 @@ export const CollectLink = () => {
                 await handleCollect(data);
             }
         } catch (error) {
-            console.log('Action error:', error.message);
             Alert.alert(t('error'), t('action_failed'));
+        } finally {
+            setIsProcessingAction(false);
+            setLoading(false);
         }
     };
 
@@ -151,12 +169,12 @@ export const CollectLink = () => {
                 message: `${t('check_out_this_link')} ${data}`,
             });
 
-            if (result.action === Share.sharedAction) {
-                ToastAndroid.show(t('shared_successfully'), ToastAndroid.SHORT);
-            }
+            // if (result.action === Share.sharedAction) {
+            //     ToastAndroid.show(t('shared_successfully'), ToastAndroid.SHORT);
+            // }
         } catch (error) {
-            console.log('Share error:', error.message);
             Alert.alert(t('error'), t('share_failed'));
+            throw error;
         }
     };
 
@@ -169,44 +187,17 @@ export const CollectLink = () => {
 
             await Linking.openURL(url);
         } catch (error) {
-            console.log('Open URL error:', error.message);
             Alert.alert(t('error'), t('fail_to_open_link'));
-        }
-    };
-
-    const triggerActionWithAd = async (actionType, data) => {
-        if (isProcessingAction) return; // Prevent multiple clicks
-
-        const hasNetwork = await checkNetworkBeforeAction();
-        if (!hasNetwork) return;
-
-        setIsProcessingAction(true);
-        currentActionRef.current = actionType;
-        currentDataRef.current = data;
-
-        try {
-            if (rewardedAdRef.current?.ad?.loaded) {
-                await rewardedAdRef.current.ad.show();
-            } else {
-                // If ad isn't loaded, perform action immediately and load new ad
-                await performActionAfterAd();
-                setIsProcessingAction(false);
-                initializeRewardedAd();
-            }
-        } catch (error) {
-            console.log('Ad show error:', error.message);
-            await performActionAfterAd();
-            setIsProcessingAction(false);
-            initializeRewardedAd();
+            throw error;
         }
     };
 
     const onShare = async (data) => {
-        await triggerActionWithAd('share', data);
+        await loadAndShowRewardedAd('share', data);
     };
 
     const openLink = async (url) => {
-        await triggerActionWithAd('collect', url);
+        await loadAndShowRewardedAd('collect', url);
     };
 
     const copyToClipboard = (text) => {
@@ -247,22 +238,30 @@ export const CollectLink = () => {
                 </View>
                 {/* Banner Ad */}
                 <View style={Styles.adContainer}>
+                    {bannerAdLoading && (
+                        <View style={Styles.adPlaceholder}>
+                            <CustomText title="Loading..." style={Styles.adPlaceholderText} />
+                        </View>
+                    )}
                     <BannerAd
                         unitId={bannerAdUnitId}
                         size={BannerAdSize.MEDIUM_RECTANGLE}
                         requestOptions={{
                             requestNonPersonalizedAdsOnly: true,
-                            keywords: ['coupons', 'rewards', 'shopping', 'deals'],
+                            keywords: ['games', 'gaming', 'mobile gaming', 'entertainment', 'rewards', 'shopping', 'lifestyle', 'technology'],
                         }}
-                        onAdLoaded={() => setBannerAdError(false)}
+                        onAdLoaded={() => {
+                            setBannerAdLoading(false);
+                            setBannerAdError(false);
+                        }}
                         onAdFailedToLoad={(error) => {
-                            console.log('Banner ad failed to load:', error.message);
+                            setBannerAdLoading(false);
                             setBannerAdError(true);
                         }}
                     />
-                    {bannerAdError && (
+                    {bannerAdError && !bannerAdLoading && (
                         <View style={Styles.adPlaceholder}>
-                            <CustomText title={t('ad_loading')} style={Styles.adPlaceholderText} />
+                            <CustomText title={t('ad_failed')} style={Styles.adPlaceholderText} />
                         </View>
                     )}
                 </View>
@@ -290,6 +289,16 @@ export const CollectLink = () => {
                     <CustomText title={t('collect')} style={Styles.CollectbuttonText} />
                 </TouchableOpacity>
             </View>
+
+            {loading && (
+                <Modal transparent={true} animationType="fade">
+                    <View style={Styles.loaderContainer}>
+                        <View style={Styles.innerContainer}>
+                            <ActivityIndicator size="large" color={theme.colors.primary} />
+                        </View>
+                    </View>
+                </Modal>
+            )}
         </View>
     );
 };
@@ -448,9 +457,6 @@ const createStyles = ({ text: { heading, body, subheading }, colors: { primary, 
             width: '100%',
             minHeight: 250,
             backgroundColor: background,
-            borderColor: primary,
-            borderWidth: 1,
-            borderRadius: width * 0.025,
             marginVertical: width * 0.03,
             justifyContent: 'center',
             alignItems: 'center',
@@ -458,15 +464,30 @@ const createStyles = ({ text: { heading, body, subheading }, colors: { primary, 
         },
         adPlaceholder: {
             width: '100%',
-            height: '100%',
+            height: 250,
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: background,
+            position: 'absolute',
         },
         adPlaceholderText: {
             fontSize: body.fontSize,
             color: secondary,
             textAlign: 'center',
         },
+        loaderContainer: {
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        innerContainer: {
+            width: "40%",
+            padding: width * 0.07,
+            backgroundColor: background,
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: width * 0.03
+        }
     });
 };

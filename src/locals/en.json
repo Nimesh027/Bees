@@ -69,5 +69,13 @@
   "default_screen": "Default",
   "error_screen": "Error",
   "language": "Language",
-  "tap_collect_button": "Tap the Collect button to claim your bonus and start playing!"
+  "tap_collect_button": "Tap the Collect button to claim your bonus and start playing!",
+  "no_data_provided": "No data provided",
+  "action_failed": "Action Failed",
+  "share_failed": "Share failed",
+  "no_text_to_copy": "No text to copy",
+  "ad_failed": "Add Failed",
+  "ad_failed_to_load": "Add Failed to load",
+  "external_link_failed": "external_link_failed"
+
 }

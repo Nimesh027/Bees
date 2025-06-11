@@ -69,6 +69,13 @@
   "default_screen": "Implicit",
   "error_screen": "Eroare",
   "language": "Limbă",
-  "tap_collect_button": "Atinge butonul Colectează pentru a revendica bonusul și a începe să joci!"
+  "tap_collect_button": "Atinge butonul Colectează pentru a revendica bonusul și a începe să joci!",
+  "no_data_provided": "Nu au fost furnizate date",
+  "action_failed": "Acțiune eșuată",
+  "share_failed": "Partajare eșuată",
+  "no_text_to_copy": "Niciun text de copiat",
+  "ad_failed": "Adăugare eșuată",
+  "ad_failed_to_load": "Anunțul nu s-a încărcat",
+  "external_link_failed": "Link extern eșuat"
   }
   

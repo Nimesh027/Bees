@@ -69,5 +69,12 @@
   "default_screen": "Par défaut",
   "error_screen": "Erreur",
   "language": "Langue",
-  "tap_collect_button": "Appuyez sur le bouton Collecter pour réclamer votre bonus et commencer à jouer!"
+  "tap_collect_button": "Appuyez sur le bouton Collecter pour réclamer votre bonus et commencer à jouer!",
+  "no_data_provided": "Aucune donnée fournie",
+  "action_failed": "Action échouée",
+  "share_failed": "Partage échoué",
+  "no_text_to_copy": "Aucun texte à copier",
+  "ad_failed": "Ajout échoué",
+  "ad_failed_to_load": "L'annonce n'a pas pu être chargée",
+  "external_link_failed": "Lien externe échoué"
 }
