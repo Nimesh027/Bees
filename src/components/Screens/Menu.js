@@ -1,19 +1,15 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
     View, TouchableOpacity, Text, StyleSheet,
-    Alert, Linking, Share, Modal, TextInput, ToastAndroid
+    Alert, Linking, Share
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../../theme/theme';
 import { useTranslation } from 'react-i18next';
 
 export const Menu = () => {
     const { t } = useTranslation();
-    const [modalVisible, setModalVisible] = useState(false);
-    const [rating, setRating] = useState(0);
-    const [feedback, setFeedback] = useState('');
     const Styles = useMemo(() => createStyles(theme), [theme]);
     const navigation = useNavigation();
 
@@ -42,22 +38,6 @@ export const Menu = () => {
         openLink(mailtoUrl);
     };
 
-    const submitRating = async () => {
-        if (rating === 0) {
-            Alert.alert(t('select_star_rating'));
-            return;
-        }
-        try {
-            await AsyncStorage.setItem('userRating', JSON.stringify({ rating, feedback }));
-            ToastAndroid.show(t('thank_you_your_feedback_is_saved'), ToastAndroid.SHORT);
-            setModalVisible(false);
-            setRating(0);
-            setFeedback('');
-        } catch (error) {
-            ToastAndroid.show(t('error_failed_to_save_feedback'), ToastAndroid.SHORT);
-        }
-    };
-
     const menuItems = [
         {
             id: 'language',
@@ -65,24 +45,12 @@ export const Menu = () => {
             icon: 'language',
             action: () => navigation.navigate('Language'),
         },
-        // {
-        //     id: 'rate',
-        //     title: t('give_five_star'),
-        //     icon: 'star',
-        //     action: () => setModalVisible(true),
-        // },
         {
             id: 'share',
             title: t('share_app'),
             icon: 'share-alt',
-            action: () => onShare('https://rewards.coinmaster.com/rewards/rewards.html?c=pe_EMAILqPGdhZ_20241027')
+            action: () => onShare('https://play.google.com/store/apps/details?id=com.masterspin')
         },
-        // {
-        //     id: 'more_apps',
-        //     title: t('more_apps'),
-        //     icon: 'th-large',
-        //     action: () => console.log('More Apps')
-        // },
         {
             id: 'privacy_policy',
             title: t('privacy_and_policy'),
@@ -124,52 +92,6 @@ export const Menu = () => {
                 </TouchableOpacity>
             ))}
 
-            <Modal visible={modalVisible} animationType="slide" transparent>
-                <View style={Styles.modalContainer}>
-                    <View style={Styles.modalContent}>
-                        {/* Header Section with RATE US and Close Icon */}
-                        <View style={Styles.header}>
-                            <Text style={Styles.modalTitle}>{t('rate_us')}</Text>
-                            <TouchableOpacity style={Styles.closeIcon} onPress={() => setModalVisible(false)}>
-                                <FontAwesome
-                                    name="times"
-                                    size={theme.dimensions.width * 0.06}
-                                    color={theme.colors.primary}
-                                />
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Line Below Header */}
-                        <View style={Styles.headerLine} />
-
-                        {/* Rest of the modal content */}
-                        <View style={Styles.starContainer}>
-                            {[1, 2, 3, 4, 5].map((num) => (
-                                <TouchableOpacity key={num} onPress={() => setRating(num)} style={Styles.star}>
-                                    <FontAwesome
-                                        name={rating >= num ? 'star' : 'star-o'}
-                                        size={theme.dimensions.width * 0.1}
-                                        color={theme.colors.primary}
-                                    />
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        <TextInput
-                            style={Styles.textArea}
-                            placeholder={t('feed_bake')}
-                            placeholderTextColor={theme.colors.secondary}
-                            value={feedback}
-                            onChangeText={setFeedback}
-                            multiline
-                        />
-
-                        <TouchableOpacity style={Styles.submitButton} onPress={submitRating}>
-                            <Text style={Styles.submitButtonText}>{t('submit')}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
         </View>
     );
 };

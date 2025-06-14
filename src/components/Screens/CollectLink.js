@@ -261,7 +261,7 @@ export const CollectLink = () => {
                     />
                     {bannerAdError && !bannerAdLoading && (
                         <View style={Styles.adPlaceholder}>
-                            <CustomText title={t('ad_failed')} style={Styles.adPlaceholderText} />
+                            <CustomText title={t('ad_failed_to_load')} style={Styles.adPlaceholderText} />
                         </View>
                     )}
                 </View>
@@ -454,20 +454,21 @@ const createStyles = ({ text: { heading, body, subheading }, colors: { primary, 
             marginHorizontal: 10,
         },
         adContainer: {
-            width: '100%',
-            minHeight: 250,
-            backgroundColor: background,
-            marginVertical: width * 0.03,
-            justifyContent: 'center',
             alignItems: 'center',
-            overflow: 'hidden',
+            padding: width * 0.03,
+            minHeight: 250,
+            justifyContent: 'center',
+            backgroundColor: background,
+            borderRadius: width * 0.02,
+            marginBottom: width * 0.03,
         },
         adPlaceholder: {
             width: '100%',
             height: 250,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: background,
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            borderRadius: width * 0.02,
             position: 'absolute',
         },
         adPlaceholderText: {
