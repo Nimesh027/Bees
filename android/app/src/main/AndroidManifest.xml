@@ -12,6 +12,16 @@
       android:allowBackup="false"
       android:theme="@style/AppTheme"
       android:supportsRtl="true">
+
+      <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4241920534057829~3295687063"/>
+      <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+      <meta-data
+            android:name="android.max_aspect"
+            android:value="2.1" />
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"
@@ -25,5 +35,11 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+      <receiver android:name="com.google.android.gms.ads.AdIdReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.ads.identifier.service.START" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

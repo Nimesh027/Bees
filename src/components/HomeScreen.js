@@ -1,13 +1,14 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableWithoutFeedback, ToastAndroid, BackHandler, Alert, Linking, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableWithoutFeedback, ToastAndroid, BackHandler, Alert, Linking } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDataContext } from '../service/DataContext';
 import { theme } from '../theme/theme';
 import { useTranslation } from 'react-i18next';
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+import NetInfo from '@react-native-community/netinfo';
 
-const bannerAdUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-4241920534057829/5236041422';
+const bannerAdUnitId = 'ca-app-pub-4241920534057829/5236041422';
 
 export const HomeScreen = () => {
   const { t } = useTranslation();
@@ -20,15 +21,22 @@ export const HomeScreen = () => {
   const [adError, setAdError] = useState(null);
   const [bannerAdLoading, setBannerAdLoading] = useState(true);
   const [showAd, setShowAd] = useState(false);
-
   const [navigationCount, setNavigationCount] = useState(0);
 
   const gameList = useMemo(() => [
-    { title: 'Spins', icon: 'gift', name: t('daily_free_spin'), color: "#FF6347" },
-    { title: 'CM Guide', icon: 'book', name: t('cm_guide'), color: "#6495ED" },
-    { title: 'Tips', icon: 'lightbulb-o', name: t('tips_and_tricks'), color: "#008080" },
-    { title: 'Privacy Policy', icon: 'info-circle', name: t('privacy_and_policy'), color: "#8A2BE2" },
+    { title: 'Spins', icon: 'gift', name: t('daily_free_spin'), color: '#FF6347' },
+    { title: 'CM Guide', icon: 'book', name: t('cm_guide'), color: '#6495ED' },
+    { title: 'Tips', icon: 'lightbulb-o', name: t('tips_and_tricks'), color: '#008080' },
+    { title: 'Privacy Policy', icon: 'info-circle', name: t('privacy_and_policy'), color: '#8A2BE2' },
   ], [t]);
+
+  useEffect(() => {
+    NetInfo.fetch().then(state => {
+      if (!state.isConnected) {
+        setAdError(t('no_internet_connection'));
+      }
+    });
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -92,7 +100,7 @@ export const HomeScreen = () => {
 
   const handleAdError = (error) => {
     setAdLoaded(false);
-    setAdError(t('ad_failed_to_load'));
+    setAdError(`${t('ad_failed_to_load')}`);
     setBannerAdLoading(false);
 
     setTimeout(() => {
@@ -114,7 +122,7 @@ export const HomeScreen = () => {
           <View style={[Styles.cardContainer, { backgroundColor: item.color }, loadingCard === index && Styles.dullCard]}>
             <View style={Styles.titleContainer}>
               <View style={Styles.circle}>
-                <Icon name={item.icon} size={theme.dimensions.width * 0.07} color={item?.color} />
+                <Icon name={item.icon} size={theme.dimensions.width * 0.07} color={item.color} />
               </View>
               <Text style={Styles.title}>{item.name}</Text>
               {loadingCard === index ? (
@@ -138,8 +146,9 @@ export const HomeScreen = () => {
             unitId={bannerAdUnitId}
             size={BannerAdSize.MEDIUM_RECTANGLE}
             requestOptions={{
-              requestNonPersonalizedAdsOnly: true,
+              requestNonPersonalizedAdsOnly: false, // Allow personalized ads if compliant
               keywords: ['games', 'gaming', 'mobile gaming', 'entertainment', 'rewards', 'shopping', 'lifestyle', 'technology'],
+              testDevices: ['eed37b42-00be-4416-9483-64f207f00fc5'], // Replace with your test device ID
             }}
             onAdLoaded={handleAdLoad}
             onAdFailedToLoad={handleAdError}
@@ -151,7 +160,6 @@ export const HomeScreen = () => {
           </View>
         )}
       </View>
-
     </ScrollView>
   );
 };
@@ -162,7 +170,7 @@ const createStyles = ({ text: { subheading }, colors: { secondary, background, p
       padding: width * 0.03,
       backgroundColor: background,
       flexGrow: 1,
-      paddingBottom: width * 0.1, 
+      paddingBottom: width * 0.1,
     },
     cardContainer: {
       marginVertical: width * 0.01,
@@ -226,12 +234,5 @@ const createStyles = ({ text: { subheading }, colors: { secondary, background, p
       fontSize: subheading.fontSize * 0.8,
       textAlign: 'center',
       padding: width * 0.02,
-    },
-    adDisclaimer: {
-      fontSize: subheading.fontSize * 0.7,
-      color: '#888',
-      textAlign: 'center',
-      marginTop: width * 0.02,
-      marginBottom: width * 0.05,
     },
   });

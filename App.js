@@ -24,22 +24,24 @@ const Stack = createNativeStackNavigator();
 const App = () => {
 
   useEffect(() => {
-    mobileAds()
-      .initialize()
-      .then(adapterStatuses => {
-        if (__DEV__) {
-          console.log('AdMob initialized:', adapterStatuses);
-        }
-      })
-      .catch(error => {
-        if (__DEV__) {
-          console.error('AdMob initialization failed:', error);
-        }
-      });
-  }, []);
+  let retryCount = 0;
+  const maxRetries = 3;
+  const initializeAds = async () => {
+    if (retryCount >= maxRetries) {
+      return;
+    }
+    try {
+      await mobileAds().initialize();
+    } catch (error) {
+      retryCount++;
+      setTimeout(initializeAds, 5000);
+    }
+  };
+  initializeAds();
+}, []);
 
   return (
-    <ThemeProvider>
+    // <ThemeProvider>
       <DataProvider>
         <SafeAreaProvider>
           <SafeAreaView style={{ flex: 1 }}>
@@ -76,7 +78,7 @@ const App = () => {
           </SafeAreaView>
         </SafeAreaProvider>
       </DataProvider>
-    </ThemeProvider>
+    // </ThemeProvider>
   );
 };
 

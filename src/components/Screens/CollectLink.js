@@ -10,18 +10,16 @@ import { useTranslation } from 'react-i18next';
 import { BannerAd, BannerAdSize, TestIds, RewardedAd, RewardedAdEventType, AdEventType } from 'react-native-google-mobile-ads';
 import NetInfo from '@react-native-community/netinfo';
 
-// Ad Configuration
-const bannerAdUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-4241920534057829/5350998591';
-const rewardedAdUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-4241920534057829/8764222895';
-const AD_LOAD_TIMEOUT = 5000; // 4 seconds timeout for ad loading
+const bannerAdUnitId = 'ca-app-pub-4241920534057829/8206473638';
+const rewardedAdUnitId = 'ca-app-pub-4241920534057829/8764222895';
+const AD_LOAD_TIMEOUT = 5000; 
 
 export const CollectLink = () => {
     const { t } = useTranslation();
-    const { isConnected, checkNetworkConnection } = useDataContext();
     const navigation = useNavigation();
     const Styles = useMemo(() => createStyles(theme), [theme]);
     const { collectedData } = useDataContext();
-    const [bannerAdError, setBannerAdError] = useState(false);
+    const [bannerAdError, setBannerAdError] = useState(null);
     const [isProcessingAction, setIsProcessingAction] = useState(false);
     const [bannerAdLoading, setBannerAdLoading] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -61,7 +59,6 @@ export const CollectLink = () => {
         currentActionRef.current = actionType;
         currentDataRef.current = data;
 
-        // Create new rewarded ad instance
         const ad = RewardedAd.createForAdRequest(rewardedAdUnitId, {
             requestNonPersonalizedAdsOnly: true,
             keywords: ['mobile gaming', 'rewards', 'app installs', 'subscriptions', 'ecommerce', 'promotions', 'incentives', 'digital offers'],
@@ -70,7 +67,6 @@ export const CollectLink = () => {
         let timeoutId = null;
         let hasAdLoaded = false;
 
-        // Set up timeout to perform action if ad doesn't load in 4 seconds
         timeoutId = setTimeout(() => {
             if (!hasAdLoaded && isMountedRef.current) {
                 performActionAfterAd();
@@ -80,7 +76,6 @@ export const CollectLink = () => {
             }
         }, AD_LOAD_TIMEOUT);
 
-        // Set up event listeners
         const loadedListener = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
             hasAdLoaded = true;
             clearTimeout(timeoutId);
@@ -124,7 +119,6 @@ export const CollectLink = () => {
             errorListener();
         };
 
-        // Start loading the ad
         try {
             ad.load();
         } catch (error) {
@@ -169,9 +163,6 @@ export const CollectLink = () => {
                 message: `${t('check_out_this_link')} ${data}`,
             });
 
-            // if (result.action === Share.sharedAction) {
-            //     ToastAndroid.show(t('shared_successfully'), ToastAndroid.SHORT);
-            // }
         } catch (error) {
             Alert.alert(t('error'), t('share_failed'));
             throw error;
@@ -252,16 +243,16 @@ export const CollectLink = () => {
                         }}
                         onAdLoaded={() => {
                             setBannerAdLoading(false);
-                            setBannerAdError(false);
+                            setBannerAdError(null);
                         }}
                         onAdFailedToLoad={(error) => {
                             setBannerAdLoading(false);
-                            setBannerAdError(true);
+                            setBannerAdError(`${t('ad_failed_to_load')}`);
                         }}
                     />
                     {bannerAdError && !bannerAdLoading && (
                         <View style={Styles.adPlaceholder}>
-                            <CustomText title={t('ad_failed_to_load')} style={Styles.adPlaceholderText} />
+                            <CustomText title={bannerAdError} style={Styles.adPlaceholderText} />
                         </View>
                     )}
                 </View>

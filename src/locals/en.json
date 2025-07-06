@@ -74,8 +74,8 @@
   "action_failed": "Action Failed",
   "share_failed": "Share failed",
   "no_text_to_copy": "No text to copy",
-  "ad_failed": "Add Failed",
-  "ad_failed_to_load": "Adds not available",
+  "ad_failed": "Ad Failed",
+  "ad_failed_to_load": "Ads not available",
   "external_link_failed": "external_link_failed"
 
 }

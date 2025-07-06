@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 // Ad Unit IDs
-const bannerAdUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-4241920534057829/5350998591';
+const bannerAdUnitId = 'ca-app-pub-4241920534057829/5350998591';
 
 export const SpinScreen = () => {
     const { t } = useTranslation();
@@ -36,7 +36,7 @@ export const SpinScreen = () => {
 
     const handleAdError = (error) => {
         setAdLoaded(false);
-        setAdError(t('ad_failed_to_load'));
+        setAdError(`${t('ad_failed_to_load')}`);
         setBannerAdLoading(false);
     };
 
@@ -80,7 +80,7 @@ export const SpinScreen = () => {
                 )}
                 {adError && !bannerAdLoading && (
                     <View style={Styles.adPlaceholder}>
-                        <CustomText title={t('ad_failed_to_load')} style={Styles.errorText} />
+                        <CustomText title={adError} style={Styles.errorText} />
                     </View>
                 )}
             </View>
